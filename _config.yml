@@ -1,3 +1,4 @@
 ---
 name: Jason Morgan
 markdown: kramdown
+permalink: /blog/:year/:month/:day/:title
