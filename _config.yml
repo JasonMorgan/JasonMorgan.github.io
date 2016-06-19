@@ -1,4 +1,37 @@
----
-name: Jason Morgan
+# Site settings
+title: Jekyll-Uno
+description: 'Jekyll-Uno - a minimal, responsive theme for Jekyll'
+url: 'https://jasonmorgan.github.io'
+baseurl: '/'
+enforce_ssl: 'jasonmorgan.github.io'
+# google_analytics: 'UA-XXXXXX-X'
+# disqus_shortname: 'your-disqus-name'
+
+author:
+  name: 'Jason Morgan'
+  email: jmorgan@f9vs.com
+  twitter_username: rjasonmorgan
+  facebook_username: jmorgan82
+  github_username:  jasonmorgan
+  linkedin_username:  jasonmorgan2
+
+# Build settings
+destination: _site
+paginate: 10
+permalink: /:title
 markdown: kramdown
-permalink: /blog/:year/:month/:day/:title
+highlighter: rouge
+
+kramdown:
+  # use Github Flavored Markdown
+  input: GFM
+  # do not replace newlines by <br>s
+  hard_wrap: false
+
+gems: 
+  - jekyll-paginate
+  - jemoji
+  - jekyll-sitemap
+  - jekyll-gist
+  
+exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'screenshot.png']
