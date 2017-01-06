@@ -1,6 +1,6 @@
 # Site settings
-title: Jekyll-Uno
-description: 'Jekyll-Uno - a minimal, responsive theme for Jekyll'
+title: JasonMorgan
+description: 'Jason's Blog - Running on Jekyll-Uno'
 url: 'https://jasonmorgan.github.io'
 baseurl: '/'
 enforce_ssl: 'jasonmorgan.github.io'
@@ -11,7 +11,7 @@ author:
   name: 'Jason Morgan'
   email: jmorgan@f9vs.com
   twitter_username: rjasonmorgan
-  facebook_username: jmorgan82
+  facebook_username: rjasonmorgan
   github_username:  jasonmorgan
   linkedin_username:  jasonmorgan2
 
