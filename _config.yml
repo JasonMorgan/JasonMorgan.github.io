@@ -1,5 +1,5 @@
 # Site settings
-title: JasonMorgan
+title: Jekyll-Uno
 description: 'Jason's Blog - Running on Jekyll-Uno'
 url: 'https://jasonmorgan.github.io'
 baseurl: '/'
