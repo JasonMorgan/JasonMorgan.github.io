@@ -35,7 +35,7 @@ I'm not going to get into what [helm](https://helm.sh/) is and the rest of this 
 
 ### Getting into the code
 
-Kubernetes is effectively tons of YAML so now we're going to dive into that now.
+Kubernetes is effectively tons of YAML so we're going to dive into that now.
 
 #### Pre reqs
 
