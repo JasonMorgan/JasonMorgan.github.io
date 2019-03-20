@@ -130,6 +130,8 @@ To download the chart locally
 helm fetch stable/concourse --version 3.8.0 --untar
 ```
 
+I like to download the charts locally and render them myself using helm's templating functionality but that's a topic for another day.
+
 Keep in mind you have 2 version numbers in play here, the version of the app the chart is managing and the version of the chart. 3.8.0 refers to the chart version and 4.2.2 is the version of concourse it's running. We're actually going to fix that a little when we deploy the app as 4.2.2 still has the bad old version of runc so we're going to fix that by going to 4.2.3.
 
 I always maintain my own version of a chart's values file even when I accept the defaults.
@@ -140,7 +142,7 @@ cp concourse/values.yaml values.yaml
 
 #### Important Modifications
 
-Just to get started the helm chart itself bundles a pretty good explanation of values right in the values file. The [repo page](https://github.com/helm/charts/tree/master/stable/concourse) also does a pretty good job getting you up and running.
+Just to get started the helm chart itself bundles a pretty good explanation of values right in the values file. The [repo page](https://github.com/helm/charts/tree/master/stable/concourse) also does a pretty good job getting you up and running. Make the modifications recommended below to the values.yaml file you have saved in your working directory.
 
 ##### Secrets
 
@@ -149,3 +151,21 @@ So the Chart ships with [some secrets built into it](https://github.com/helm/cha
 ##### Persistence
 
 Read [this section](https://github.com/helm/charts/tree/master/stable/concourse#persistence) carefully. They aren't joking about the workers filling up your local disks, I managed to bring down 3 workers when I tried to save a little money by skipping the PVCs.
+
+#### Deploying our Concourse Instance
+
+Assuming you've gone ahead and followed the steps above we're going to make one more modification to our values file then deploy. We need to swap out the `imageTag` value from `4.2.2` to `4.2.3`. And again just for clarity we need to use 4.2.3 as 4.2.2 still bundles a [bad version of runc]() that we don't need to be putting out there.
+
+With that done we can go ahead and set up our concourse instance.
+
+```bash
+helm install stable/concourse --version 3.8.0 --values values.yaml
+```
+
+Helm's output will tell you how to access your instance and that will be enough to get up and running.
+
+## Conclusion
+
+The Concourse helm chart is pretty functional and the maintainers seem to be doing a good job with it. I'd recommend it for getting started running concourse in k8s. My next post will go over using cert-manager to automatically generate certificates that you can use for apps like concourse.
+
+Thanks for reading!
