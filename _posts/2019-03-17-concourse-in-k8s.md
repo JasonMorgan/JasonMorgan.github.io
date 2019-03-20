@@ -6,13 +6,11 @@ published: true
 ---
 
 
-[Concourse](https://concourse-ci.org/) is a handy tool for running build jobs or any other arbitrary code you want, otherwise known as a CI server. It has it's own [DSL](https://en.wikipedia.org/wiki/Domain-specific_language), domain specific language, that you have to learn but it wasn't too much of a burden for me to pick up. If you're looking for some help getting started with concourse I'd highly recommend [this delightful tutorial](https://concoursetutorial.com/) from the folks over at Starke & Wayne.
-
-Please keep in mind that a lot of this is just personal preference and you should feel free to chop up this advice in the way that best meets your needs.
+[Concourse](https://concourse-ci.org/) is a handy tool for running build jobs or any other arbitrary code you want, otherwise known as a CI server. It has it's own [DSL](https://en.wikipedia.org/wiki/Domain-specific_language), domain specific language, that you have to learn but it wasn't too much of a burden for me to pick up. If you're looking for some help getting started with concourse I recommend [this delightful tutorial](https://concoursetutorial.com/) from the folks over at Starke & Wayne.
 
 ## Deploying Concourse
 
-You have a lot of options for deploying your own concourse instance. A few examples below:
+You have a lot of options for deploying your own concourse instance. A few examples below.
 
 * a Bosh release
 * Pivotal provides a somewhat curated release over at network.pivotal.io
@@ -23,11 +21,9 @@ You have a lot of options for deploying your own concourse instance. A few examp
       * it will even connect concourse to credhub so it can securely store and retrieve credentials
     * A prometheus instance with Grafana
   * It's pretty sweet overall and if you're running in GCP or AWS it'll work well for you
-* BUCC from Starke and Wayne
+* [BUCC](https://github.com/starkandwayne/bucc) from Starke and Wayne
   * Supposed to be similar to Concourse-up but more IaaS agnostic
   * I personally haven't gotten it working so take that for what it's worth
-
-You'll notice there's nothing about kubernetes in that list. Let's dive into the steps you'll want to follow to get concourse running there now.
 
 ## Concourse in K8s
 
@@ -39,7 +35,7 @@ I'm not going to get into what [helm](https://helm.sh/) is and the rest of this 
 
 ### Getting into the code
 
-Kubernetes is YAML so now we're going to dive into that.
+Kubernetes is effectively tons of YAML so now we're going to dive into that now.
 
 #### Pre reqs
 
