@@ -1,6 +1,6 @@
 # Site settings
 title: Jason's Blog
-description: "It's a blog, it may have some content..."
+description: "A place for me to talk about things. It's possible some of them may interest you."
 url: 'https://jasonmorgan.github.io'
 baseurl: '/'
 enforce_ssl: 'jasonmorgan.github.io'
