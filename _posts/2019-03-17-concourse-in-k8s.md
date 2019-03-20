@@ -5,7 +5,6 @@ tags: [ci,concourse,kubernetes]
 published: true
 ---
 
-# Beginning Words
 
 [Concourse](https://concourse-ci.org/) is a handy tool for running build jobs or any other arbitrary code you want, otherwise known as a CI server. It has it's own [DSL](https://en.wikipedia.org/wiki/Domain-specific_language), domain specific language, that you have to learn but it wasn't too much of a burden for me to pick up. If you're looking for some help getting started with concourse I'd highly recommend [this delightful tutorial](https://concoursetutorial.com/) from the folks over at Starke & Wayne.
 
