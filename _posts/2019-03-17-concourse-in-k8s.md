@@ -86,14 +86,14 @@ The big thing here is making sure that the tiller account exists and has appropr
 After saving the tiller file we're going to apply it to our kube cluster.
 
 ```shell
-    kubectl apply -f tiller.yaml
+kubectl apply -f tiller.yaml
 ```
 
 you should see output that looks super similar to this
 
 ```shell
-    serviceaccount/tiller created
-    clusterrolebinding.rbac.authorization.k8s.io/tiller created
+serviceaccount/tiller created
+clusterrolebinding.rbac.authorization.k8s.io/tiller created
 ```
 
 ##### Helm Init
