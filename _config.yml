@@ -20,7 +20,7 @@ destination: _site
 paginate: 10
 permalink: /:title
 markdown: kramdown
-highlighter: rouge
+highlighter: Pygments
 
 kramdown:
   # use Github Flavored Markdown
