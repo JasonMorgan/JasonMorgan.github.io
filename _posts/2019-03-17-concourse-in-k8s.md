@@ -85,13 +85,13 @@ The big thing here is making sure that the tiller account exists and has appropr
 
 After saving the tiller file we're going to apply it to our kube cluster.
 
-```bash
+```shell
 kubectl apply -f tiller.yaml
 ```
 
 you should see output that looks super similar to this
 
-```bash
+```shell
 serviceaccount/tiller created
 clusterrolebinding.rbac.authorization.k8s.io/tiller created
 ```
@@ -100,13 +100,13 @@ clusterrolebinding.rbac.authorization.k8s.io/tiller created
 
 With our service account in place we're clear to start tiller.
 
-```bash
+```shell
 helm init --service-account tiller
 ```
 
 You can test the install by running
 
-```bash
+```shell
 helm version
 ```
 
@@ -122,7 +122,7 @@ I like to download a copy locally to get started. Also as a side note I'm going 
 
 To download the chart locally
 
-```bash
+```shell
 helm fetch stable/concourse --version 3.8.0 --untar
 ```
 
@@ -132,7 +132,7 @@ Keep in mind you have 2 version numbers in play here, the version of the app the
 
 I always maintain my own version of a chart's values file even when I accept the defaults.
 
-```bash
+```shell
 cp concourse/values.yaml values.yaml
 ```
 
@@ -154,7 +154,7 @@ Assuming you've gone ahead and followed the steps above we're going to make one 
 
 With that done we can go ahead and set up our concourse instance.
 
-```bash
+```shell
 helm install stable/concourse --version 3.8.0 --values values.yaml
 ```
 
