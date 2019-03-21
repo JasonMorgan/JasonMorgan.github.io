@@ -1,7 +1,7 @@
 ---
 title:  "Concourse in Kubernetes"
 categories: [ci]
-tags: [ci,concourse,kubernetes]
+tags: [ci,concourse,kubernetes,k8s]
 published: true
 ---
 
