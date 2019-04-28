@@ -2,7 +2,7 @@
 title:  "Issuing Certificates with Cert-Manager and Let's Encrypt"
 categories: [certificates]
 tags: [certificates,LetsEncrypt,kubernetes,k8s, cert-manager]
-published: false
+published: true
 ---
 
 I go out of my way to secure all my sites with a valid https certificate. I'm also fairly cheap, so this used to leave me with a bit of a dilemma and honestly AWS's certificate manager used to be my go to option. It was handy but I was effectively stuck using AWS and having an Elastic Load Balancer, ELB, to terminate my tls connections. Before we go too deep here if any of the terms I'm using are a little ambiguous I'd recommend checking out [this article](https://www.websecurity.symantec.com/security-topics/what-is-ssl-tls-https) from symantec on the meaning of ssl, tls, and https. The first section covers the definitions well enough that hopefully you feel comfortable with the difference between the terms.
