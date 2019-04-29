@@ -5,17 +5,17 @@ tags: [certificates,LetsEncrypt,kubernetes,k8s, cert-manager]
 published: true
 ---
 
-I go out of my way to secure all my sites with a valid https certificate. I'm also fairly cheap, so this used to leave me with a bit of a dilemma and honestly AWS's certificate manager used to be my go to option. It was handy but I was effectively stuck using AWS and having an Elastic Load Balancer, ELB, to terminate my tls connections. Before we go too deep here if any of the terms I'm using are a little ambiguous I'd recommend checking out [this article](https://www.websecurity.symantec.com/security-topics/what-is-ssl-tls-https) from symantec on the meaning of ssl, tls, and https. The first section covers the definitions well enough that hopefully you feel comfortable with the difference between the terms.
+I go out of my way to secure all my sites with a valid https certificate. I'm also fairly cheap, this left me with a dilemma and [AWS's certificate manager](https://aws.amazon.com/certificate-manager/) used to be my only option. It was handy but I was effectively stuck on AWS and had to use an Elastic Load Balancer, ELB, to terminate my TLS connections. Before we go too deep here if any of the terms I'm using are a little ambiguous I'd recommend checking out [this article](https://www.websecurity.symantec.com/security-topics/what-is-ssl-tls-https) from symantec on the meaning of SSL, TLS, and https. The first section covers the definitions well enough that hopefully you feel comfortable with the difference between the terms.
 
 ## Concepts
 
 ### Let's Encrypt
 
-[Let's Encrypt](https://letsencrypt.org/) is a free service that allows you to programmatically generate tls certificates. It's not always super well documented or easy to use but once you get it in place you can generate, use, and renew certificates on a regular basis without a ton of manual work.
+[Let's Encrypt](https://letsencrypt.org/) is a free service that allows you to programmatically generate TLS certificates. It's not always super well documented or easy to use but once you get it in place you can generate, use, and renew certificates on a regular basis for free. On top of that Let's Encrypt pioneered a new IETF standard for programmatically doing Domain Validation. I'll get into how and why that works right now.
 
 ### Cert-Manager
 
-[cert-manager](https://docs.cert-manager.io/en/latest/#) is a kubernetes service that will interact with LetsEncrypt, or another CA, for you to programmatically request, generate, and renew certificates. We're going to limit our scope today to working with Let'sEncrypt. Go [here](https://docs.cert-manager.io/en/latest/getting-started/install.html#installing-with-helm) to ignore some of this guide and just install the latest cert-manager. They're moving to a non default helm repo and have their own getting started instructions. I'll cover it in more detail in the [Getting to the Code](#Code) section.
+[cert-manager](https://docs.cert-manager.io/en/latest/#) is a kubernetes service that will interact with LetsEncrypt, or another CA, for you to programmatically request, generate, and renew certificates. We're going to limit our scope today to working with Let'sEncrypt. Go [here](https://docs.cert-manager.io/en/latest/getting-started/install.html#installing-with-helm) to ignore some of this guide and just install the latest cert-manager. They're moving to a non default helm repo and have their own getting started instructions. I'll also cover it in more detail in the [Getting to the Code](#Code) section.
 
 #### ACME and ACMEv2
 
