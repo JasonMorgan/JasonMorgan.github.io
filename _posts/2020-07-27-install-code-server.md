@@ -1,7 +1,7 @@
 ---
-title:  "Initial Experience with the Helm 3 Alpha"
+title:  "Installing code-server in Kubernetes"
 categories: [kubernetes]
-tags: [helm,kubernetes,k8s]
+tags: [code-cerver,kubernetes,k8s]
 published: true
 ---
 
