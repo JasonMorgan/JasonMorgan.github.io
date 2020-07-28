@@ -5,7 +5,7 @@ tags: [code-cerver,kubernetes,k8s]
 published: true
 ---
 
-Hey folks! I wanted to write a quick article today on getting started using code-server on kubernetes. ode-server is an open source project from the folks at coder.com that makes it easy to run and manage a cloud based vscode instance that you can connect to and operate remotely. Installing it in kubernetes has some neat benefits like allowing you to develop your app right alongside any versions of other services you want. If you're following a strong gitops flow it's pretty straightforward to build a dev cluster that closely mirrors one of your production environments. That and it allows you to log into the same vscode instance from any device and location you want.
+Hey folks! I wanted to write a quick article today on getting started using code-server on kubernetes. Code-server is an open source project from the folks at coder.com that makes it easy to run and manage a cloud based vscode instance that you can connect to and operate remotely. Installing it in kubernetes has some neat benefits like allowing you to develop your app right alongside any versions of other services you want. If you're following a strong gitops flow it's pretty straightforward to build a dev cluster that closely mirrors one of your production environments. That and it allows you to log into the same vscode instance from any device and location you want.
 
 ## Getting Started
 
