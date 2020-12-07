@@ -80,7 +80,7 @@ We use the the ca to establish a common trust between the mesh in both clusters.
 
 ### Install the Mesh
 
-#### Validating your Clusters
+#### Test your Clusters
 
 First things first, lets ensure our clusters are good to go. Linkerd's cli comes with a handy dandy check feature to see if your cluster is ready.
 
@@ -184,4 +184,39 @@ linkerd check --multicluster
 ```
 
 With that all your checks should be passing and your clusters are now ready for some workloads.
+
+## Getting our Test Service Installed
+
+The default docs want you to use two podinfo configs mapped to the values east and west. I wanted to pair it up to my cluster names so I pulled the app config into it's [own repo](https://github.com/JasonMorgan/podinfo). You can also use the east/west names from the docs by pulling app definitions from the [linkerd website](https://github.com/linkerd/website/tree/master/multicluster).
+
+When running the commands be sure you run a different version of the app manifest for each cluster.
+
+```bash
+# the podinfo repo at the path below has the config for 2 clsuters, workload1 and workload2
+kubectl apply -k github.com/jasonmorgan/podinfo/workload1/
+```
+
+## Linking, or Exporting, a Service
+
+When we decide we want to share a service between clusters with linkerd we need to let linkerd know which services to mirror. We do that with `mirror.linkerd.io/exported=true` label, alternatively if you'd like to modify the key you can find it on the `links.multicluster.linkerd.io` object in the linkerd-multicluster namespace.
+
+```bash
+# You'll only need to run this on the workloads in one cluster. I ran it on workload2
+kubectl label svc -n test podinfo mirror.linkerd.io/exported=true
+```
+
+You can now check the other cluster for the new service. I got the following output on workload1:
+
+```bash
+kubectl get svc
+
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+frontend            ClusterIP   100.65.191.192   <none>        8080/TCP            38m
+podinfo             ClusterIP   100.70.110.153   <none>        9898/TCP,9999/TCP   38m
+podinfo-workload2   ClusterIP   100.68.52.124    <none>        9898/TCP,9999/TCP   7s
+```
+
+At this point you can move on to the next section where we split traffic. If you'd like some more detailed tests checkout [this](https://linkerd.io/2/tasks/multicluster/#exporting-the-services) section of the docs or see a walkthrough of validating TLS look [here](https://linkerd.io/2/tasks/multicluster/#security).
+
+## Splitting Traffic
 
