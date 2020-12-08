@@ -7,6 +7,10 @@ published: true
 
 Hey folks! Thanks for stopping by! Today I'm going to dive into using the [linkerd](https://linkerd.io/) service mesh to route traffic between 2 [Tanzu Kubernetes Grid](https://tanzu.vmware.com/kubernetes-grid), or tkg, clusters.
 
+We're going to look at this because I see more and more folks looking at either spanning services between clusters or connecting an app in one cluster with a service in another. It could be for high availability reasons, in order to isolate workloads with more strict regulatory requirements, or even just to let stateful services run in their own clusters. Linkerd provides a secure, and relatively easy, way to do this and I'm going to set it up today. I hope you're able to follow along and I'd love to hear if you have any thoughts on the process.
+
+Thanks!
+
 ## The Set Up
 
 What we're using:
@@ -76,7 +80,7 @@ step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
 
 ```
 
-We use the the ca to establish a common trust between the mesh in both clusters. You can find a lot more useful details about the certificates and how they're used [here](https://linkerd.io/2/tasks/generate-certificates/) and [here](https://linkerd.io/2/features/automatic-mtls/#how-does-it-work).
+We use the the ca to establish a common trust between the meshes in both clusters. You can find a lot more useful details about the certificates and how they're used [here](https://linkerd.io/2/tasks/generate-certificates/) and [here](https://linkerd.io/2/features/automatic-mtls/#how-does-it-work).
 
 ### Install the Mesh
 
@@ -94,7 +98,7 @@ If you are using TMC you'll get additional warnings about Pod Security Policies 
 
 #### Running the Install
 
-Provided you're happy with the results of your pre checks it's time to run the install. I like to set up two terminals, one for each cluster but whatever mechanism you use works provided 
+Provided you're happy with the results of your pre checks it's time to run the install. I like to set up two terminals, one for each cluster.
 
 ```bash
 # Run this once per cluster
@@ -108,7 +112,7 @@ linkerd install \
   | kubectl apply -f -
 ```
 
-Once that's wrapped wait a few minutes for the pods to boot up. You can watch the linkerd namespace or, if you're using tmc you can take a peak at the workloads there.
+Once that's wrapped wait a few minutes for the pods to boot up. You can watch the linkerd namespace or, if you're using tmc you can take a peak at the workloads under the workloads tab or by looking at one of the worker nodes.
 
 ```bash
 # Run this for each cluster
@@ -119,7 +123,7 @@ or
 
 ![pods](/images/tmc-linkerd-node-pods.png)
 
-After the control plane is available you can check the status of linkerd using the cli. linkerd goes out of it's way to be easy to use and debug. With that in mind they added the check option into the cli so you can get an at a glance health check. Once again be sure you're running this for each workload cluster.
+After the control plane is available you can check the status of linkerd using the cli. linkerd goes out of it's way to be easy to use and debug. With that in mind they added the check option to the cli so you can get an at a glance health check. Once again be sure you're running this for each workload cluster.
 
 ```bash
 # Run this once per cluster
@@ -192,7 +196,7 @@ The default docs want you to use two podinfo configs mapped to the values east a
 When running the commands be sure you run a different version of the app manifest for each cluster.
 
 ```bash
-# the podinfo repo at the path below has the config for 2 clsuters, workload1 and workload2
+# the podinfo repo at the path below has the config for 2 clusters, workload1 and workload2
 kubectl apply -k github.com/jasonmorgan/podinfo/workload1/
 ```
 
@@ -230,13 +234,13 @@ podinfo-workload2   ClusterIP   100.68.52.124    <none>        9898/TCP,9999/TCP
 
 Technically you've now completed the task of sharing a service between clusters with linkerd on Tanzu Kubernetes Grid. That being said we still don't have any cool demos to show off so lets keep going.
 
-You can move on to the next section where we split traffic. If you'd like some more detailed tests checkout [this](https://linkerd.io/2/tasks/multicluster/#exporting-the-services) section of the docs or see a walkthrough of validating TLS look [here](https://linkerd.io/2/tasks/multicluster/#security).
+You can move on to the next section where we split traffic. If you'd like some more detailed tests checkout [this](https://linkerd.io/2/tasks/multicluster/#exporting-the-services) section of the docs or to see a walkthrough of validating TLS look [here](https://linkerd.io/2/tasks/multicluster/#security).
 
 ## Splitting Traffic
 
-This is where we start to see some of the power of a tool like linkerd in combination with the [Service Mesh Interface](https://smi-spec.io/) (SMI). SMI is aiming to provide for our mesh layer what CNI provides for our pod networks. It is a standard interface that allows us to define common tasks like splitting traffic, surfacing metrics, or defining access controls. SMI is still early days but you'll be able to see some of what it can do in this example. We're goingt o leverage the Traffic Split spec in order to share requests between the new podinfo services on workload cluster 1 and 2.
+This is where we start to see some of the power of a tool like Linkerd in combination with the [Service Mesh Interface](https://smi-spec.io/) (SMI). SMI is aiming to provide for our mesh layer what CNI, or the [Container Network Interface](https://landscape.cncf.io/selected=container-network-interface-cni), provides for our pod networks. It is a standard interface that allows us to define common tasks like splitting traffic, surfacing metrics, or defining access controls. SMI is still early days but you'll be able to see some of what it can do in this example. We're going to leverage the Traffic Split spec in order to share requests between the new podinfo services on workload cluster 1 and 2.
 
-We're going to create a TrafficSplit object and hand it off to our kube cluster.
+Lets create a TrafficSplit object and hand it off to our kube cluster.
 
 ```yaml
 apiVersion: split.smi-spec.io/v1alpha1
@@ -273,4 +277,9 @@ At this point you should see your browser switching between the local and remote
 
 ## Wrap Up
 
+Well I hope y'all were able to follow along and I really hope you got to have a, "that's pretty cool" moment when we split the traffic for podinfo between clusters. I certainly enjoyed it. If this is interesting I'd recommend you dig a little deeper into Linkerd and see how to expand on this example by running an app in one cluster with a database in another.
 
+**Talk about run time**
+
+Thanks so much for reading and I'd love to hear any feedback you have,
+Jason
