@@ -2,7 +2,7 @@
 title:  "Multi Cluster Service Mesh on TKG with Linkerd"
 categories: [kubernetes]
 tags: [linkerd,kubernetes,k8s,mesh]
-published: false
+published: true
 ---
 
 Hey folks! Thanks for stopping by! Today I'm going to dive into using the [linkerd](https://linkerd.io/) service mesh to route traffic between 2 [Tanzu Kubernetes Grid](https://tanzu.vmware.com/kubernetes-grid), or tkg, clusters.
@@ -196,6 +196,18 @@ When running the commands be sure you run a different version of the app manifes
 kubectl apply -k github.com/jasonmorgan/podinfo/workload1/
 ```
 
+With that done now is a good time to checkout our new podinfo web service and see what it looks like. Run the following command for each cluster, be sure to either use a different port or run one at a time then browse to your the page.
+
+```bash
+kubectl port-forward svc/frontend 8081:8080 -n test
+```
+
+Then open a browser to localhost:8081. You should see something that looks like this:
+
+![cuttle](/images/page.png)
+
+Later on when we get to [Traffic Splitting](#Splitting-Traffic) you'll be able to see the traffic shift from one cluster to the other with the port-forwarding.
+
 ## Linking, or Exporting, a Service
 
 When we decide we want to share a service between clusters with linkerd we need to let linkerd know which services to mirror. We do that with `mirror.linkerd.io/exported=true` label, alternatively if you'd like to modify the key you can find it on the `links.multicluster.linkerd.io` object in the linkerd-multicluster namespace.
@@ -216,7 +228,49 @@ podinfo             ClusterIP   100.70.110.153   <none>        9898/TCP,9999/TCP
 podinfo-workload2   ClusterIP   100.68.52.124    <none>        9898/TCP,9999/TCP   7s
 ```
 
-At this point you can move on to the next section where we split traffic. If you'd like some more detailed tests checkout [this](https://linkerd.io/2/tasks/multicluster/#exporting-the-services) section of the docs or see a walkthrough of validating TLS look [here](https://linkerd.io/2/tasks/multicluster/#security).
+Technically you've now completed the task of sharing a service between clusters with linkerd on Tanzu Kubernetes Grid. That being said we still don't have any cool demos to show off so lets keep going.
+
+You can move on to the next section where we split traffic. If you'd like some more detailed tests checkout [this](https://linkerd.io/2/tasks/multicluster/#exporting-the-services) section of the docs or see a walkthrough of validating TLS look [here](https://linkerd.io/2/tasks/multicluster/#security).
 
 ## Splitting Traffic
+
+This is where we start to see some of the power of a tool like linkerd in combination with the [Service Mesh Interface](https://smi-spec.io/) (SMI). SMI is aiming to provide for our mesh layer what CNI provides for our pod networks. It is a standard interface that allows us to define common tasks like splitting traffic, surfacing metrics, or defining access controls. SMI is still early days but you'll be able to see some of what it can do in this example. We're goingt o leverage the Traffic Split spec in order to share requests between the new podinfo services on workload cluster 1 and 2.
+
+We're going to create a TrafficSplit object and hand it off to our kube cluster.
+
+```yaml
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: podinfo
+  namespace: test
+spec:
+  service: podinfo
+  backends:
+  - service: podinfo
+    weight: 50
+  - service: podinfo-workload2
+    weight: 50
+```
+
+The file above will tell linkerd to split traffic for the podinfo service between the local podinfo on workload1, known locally as podinfo, with the podinfo service on workload2, know locally as podinfo-workload2. Save the yaml content from above into a file called split.yaml.
+
+Before we talk anymore about it lets get it up and running and checkout the output. Start by doing that port forward operation we talked about when we first deployed the podinfo app, we need to ensure we're running it on workload1.
+
+```bash
+kubectl port-forward svc/frontend 8081:8080 -n test
+```
+
+browse to localhost:8081 on your local browser and keep it open, we're going to watch what happens when we set up traffic splitting.
+
+Now apply that split.yaml we created earlier to your workload1 cluster.
+
+```bash
+kubectl apply -f split.yaml
+```
+
+At this point you should see your browser switching between the local and remote podinfo services. With that you've successfully split traffic between two kubernetes clusters with linkerd! This is pretty neat as an example but think about some other ways we could apply this. We could isolate PCI workloads to a PCI cluster or run databases in one cluster and apps in another.
+
+## Wrap Up
+
 
