@@ -15,12 +15,15 @@ Thanks!
 
 What we're using:
 
-* The tkg cli
+* The [tkg](https://my.vmware.com/group/vmware/downloads/details?downloadGroup=TKG-100&productId=988&rPId=45068) cli
   * to create, manage, and scale our k8s clusters
-  * you can download it [here](https://my.vmware.com/group/vmware/downloads/details?downloadGroup=TKG-100&productId=988&rPId=45068)
-* The linkerd cli
-  * to do all our linkerd work
+  * made with version 1.2.0
+* The [linkerd](https://linkerd.io/2/getting-started/#step-1-install-the-cli) cli
+  * to do all our Linkerd work
+  * made with version stable-2.9.0
 * Our [podinfo](https://github.com/JasonMorgan/podinfo) app
+* The [step](https://github.com/smallstep/cli/releases/tag/v0.15.3) cli
+  * made with version 0.15.3
 * Tanzu Mission Control (Optional component)
   * To manage our tkg clusters
 * The tmc cli (Optional component)
@@ -64,7 +67,7 @@ Once the clusters appear in TMC you can move on to the next step.
 
 ### Setting up the CA
 
-I'm following the linkerd multi cluster docs you can find [here](https://linkerd.io/2/tasks/multicluster/). I start out creating a new root certificate authority with [step](https://smallstep.com/cli/)
+I'm following the Linkerd multi cluster docs you can find [here](https://linkerd.io/2/tasks/multicluster/). I start out creating a new root certificate authority with [step](https://smallstep.com/cli/)
 
 ```bash
 # Generate the root ca
@@ -94,7 +97,7 @@ linkerd check --pre
 
 ![pre](/images/term-pre-check.png)
 
-Depending on your kubernetes api and linkerd versions you may get some warnings about the crd api version is but that won't impact the install.
+Depending on your kubernetes api and Linkerd versions you may get some warnings about the crd api version is but that won't impact the install.
 
 If you are using TMC you'll get additional warnings about Pod Security Policies (PSPs), you can safely ignore them provided you aren't enforcing them, otherwise you'll need to appropriately configure your PSPs which is beyond the scope of this article.
 
@@ -127,7 +130,7 @@ or
 
 ![pods](/images/tmc-linkerd-node-pods.png)
 
-After the control plane is available you can check the status of linkerd using the cli. linkerd goes out of it's way to be easy to use and debug. With that in mind they added the check option to the cli so you can get an at a glance health check. Once again be sure you're running this for each workload cluster.
+After the control plane is available you can check the status of Linkerd using the cli. Linkerd goes out of it's way to be easy to use and debug. With that in mind they added the check option to the cli so you can get an at a glance health check. Once again be sure you're running this for each workload cluster.
 
 ```bash
 # Run this once per cluster
@@ -147,7 +150,7 @@ linkerd multicluster install | kubectl apply -f -
 
 ![multi](/images/term-linkerd-multi.png)
 
-You can check the status of your multicluster install a few different ways. We're going to exercise the linkerd cli a bit, then take a peak at our kubernetes objects. The big thing we're looking for is to ensure our new gateway has a load balancer assigned to it.
+You can check the status of your multicluster install a few different ways. We're going to exercise the Linkerd cli a bit, then take a peak at our kubernetes objects. The big thing we're looking for is to ensure our new gateway has a load balancer assigned to it.
 
 ```bash
 # Run a check with linkerd
@@ -164,7 +167,7 @@ kubectl get svc -n linkerd-multicluster
 
 With our new gateways up and running we now want to "link" our clusters. You can get a more detailed explenations in the [docs](https://linkerd.io/2/tasks/multicluster/#linking-the-clusters) but the short version is that running the link commands will allow the clusters to talk and build/maintain the service mirrors.
 
-This part can be a little tricky so I'll include a screen grab after. What we need to do is run our linkerd link command to generate the yaml from 1 cluster then use kubectl to apply it to the other cluster.
+This part can be a little tricky so I'll include a screen grab after. What we need to do is run our Linkerd link command to generate the yaml from 1 cluster then use kubectl to apply it to the other cluster.
 
 ```bash
 
@@ -181,7 +184,7 @@ linkerd multicluster link --cluster-name workload1 --kubeconfig ~/configs/worklo
 
 ```
 
-You can, hopefully, see that a little more clearly in the screen grab below.
+You can, hopefully, see that a little more clearly in the screen grab below. Note the red section of the prompt indicates the current kubernetes context.
 
 ![terminal-view](/images/terminal-linkerd-mc-link.png)
 
@@ -189,7 +192,7 @@ Next you'll want to validate the clusters are properly linked. Start by running 
 
 ![terminal-gws](/images/terminal-linkerd-mc-gws.png)
 
-Note that each cluster sees the other's gateway. On top of that we can rerun our linkerd check to see more multicluster health check outputs.
+Note that each cluster sees the other's gateway. On top of that we can rerun our Linkerd check to see more multicluster health check outputs.
 
 ```bash
 linkerd check --multicluster
@@ -199,7 +202,7 @@ With that all your checks should be passing and your clusters are now ready for 
 
 ## Getting our Test Service Installed
 
-The default docs want you to use two podinfo configs mapped to the values east and west. I wanted to pair it up to my cluster names so I pulled the app config into it's [own repo](https://github.com/JasonMorgan/podinfo). You can also use the east/west names from the docs by pulling app definitions from the [linkerd website](https://github.com/linkerd/website/tree/master/multicluster).
+The default docs want you to use two podinfo configs mapped to the values east and west. I wanted to pair it up to my cluster names so I pulled the app config into it's [own repo](https://github.com/JasonMorgan/podinfo). You can also use the east/west names from the docs by pulling app definitions from the [Linkerd website](https://github.com/linkerd/website/tree/master/multicluster).
 
 When running the commands be sure you run a different version of the app manifest for each cluster.
 
@@ -224,7 +227,7 @@ Later on when we get to [Traffic Splitting](#Splitting-Traffic) you'll be able t
 
 ## Linking, or Exporting, a Service
 
-When we decide we want to share a service between clusters with linkerd we need to let linkerd know which services to mirror. We do that with `mirror.linkerd.io/exported=true` label, alternatively if you'd like to modify the key you can find it on the `links.multicluster.linkerd.io` object in the linkerd-multicluster namespace.
+When we decide we want to share a service between clusters we need to let Linkerd know which services to mirror. We do that with `mirror.linkerd.io/exported=true` label, alternatively if you'd like to modify the key you can find it on the `links.multicluster.linkerd.io` object in the linkerd-multicluster namespace.
 
 ```bash
 # You'll only need to run this on the workloads in one cluster. I ran it on workload2
@@ -242,7 +245,7 @@ podinfo             ClusterIP   100.70.110.153   <none>        9898/TCP,9999/TCP
 podinfo-workload2   ClusterIP   100.68.52.124    <none>        9898/TCP,9999/TCP   7s
 ```
 
-Technically you've now completed the task of sharing a service between clusters with linkerd on Tanzu Kubernetes Grid. That being said we still don't have any cool demos to show off so lets keep going.
+Technically you've now completed the task of sharing a service between clusters with Linkerd on Tanzu Kubernetes Grid. That being said we still don't have any cool demos to show off so lets keep going.
 
 You can move on to the next section where we split traffic. If you'd like some more detailed tests checkout [this](https://linkerd.io/2/tasks/multicluster/#exporting-the-services) section of the docs or to see a walkthrough of validating TLS look [here](https://linkerd.io/2/tasks/multicluster/#security).
 
@@ -267,7 +270,7 @@ spec:
     weight: 50
 ```
 
-The file above will tell linkerd to split traffic for the podinfo service between the local podinfo on workload1, known locally as podinfo, with the podinfo service on workload2, know locally as podinfo-workload2. Save the yaml content from above into a file called split.yaml.
+The file above will tell Linkerd to split traffic for the podinfo service between the local podinfo on workload1, known locally as podinfo, with the podinfo service on workload2, know locally as podinfo-workload2. Save the yaml content from above into a file called split.yaml.
 
 Before we talk anymore about it lets get it up and running and checkout the output. Start by doing that port forward operation we talked about when we first deployed the podinfo app, we need to ensure we're running it on workload1.
 
@@ -285,13 +288,14 @@ kubectl apply -f split.yaml
 
 ![split](/images/term-linkerd-split.png)
 
-At this point you should see your browser switching between the local and remote podinfo services. With that you've successfully split traffic between two kubernetes clusters with linkerd! This is pretty neat as an example but think about some other ways we could apply this. We could isolate PCI workloads to a PCI cluster or run backing services in one cluster and front end apps in another.
+At this point you should see your browser switching between the local and remote podinfo services. With that you've successfully split traffic between two kubernetes clusters with Linkerd! This is pretty neat as an example but think about some other ways we could apply this. We could isolate PCI workloads to a PCI cluster or run backing services in one cluster and front end apps in another.
 
 ## Wrap Up
 
 Well I hope y'all were able to follow along and I really hope you got to have a, "that's pretty cool" moment when we split the traffic for podinfo between clusters. I certainly enjoyed it. If this is interesting I'd recommend you dig a little deeper into Linkerd and see how to expand on this example by connecting an app between clusters.
 
-Once I got the hang of it I was able to run through the end to end example in about 30 minutes. I'm definitely looking forward to seeing one of my customers give this a shot and I'll be eagerly waiting for multi cluster networking with linkerd to support database connections.
+Once I got the hang of it I was able to run through the end to end example in about 30 minutes. I'm definitely looking forward to seeing one of my customers give this a shot and I'll be eagerly waiting for multi cluster networking with Linkerd to support database connections.
 
 Thanks so much for reading and I'd love to hear any feedback you have,
+
 Jason
