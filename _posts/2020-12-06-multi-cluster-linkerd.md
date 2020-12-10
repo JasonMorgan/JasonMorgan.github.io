@@ -67,7 +67,7 @@ Once the clusters appear in TMC you can move on to the next step.
 
 ### Setting up the CA
 
-I'm following the Linkerd multi cluster docs you can find [here](https://linkerd.io/2/tasks/multicluster/). I start out creating a new root certificate authority with [step](https://smallstep.com/cli/)
+I'm following the Linkerd multi cluster docs you can find [here](https://linkerd.io/2/tasks/multicluster/). I start out creating a new root certificate authority with [step](https://smallstep.com/cli/).
 
 ```bash
 # Generate the root ca
