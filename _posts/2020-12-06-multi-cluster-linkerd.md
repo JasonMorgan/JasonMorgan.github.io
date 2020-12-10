@@ -23,6 +23,7 @@ What we're using:
   * made with version stable-2.9.0
 * Our [podinfo](https://github.com/JasonMorgan/podinfo) app
 * The [step](https://github.com/smallstep/cli/releases/tag/v0.15.3) cli
+  * to generate our certificates
   * made with version 0.15.3
 * Tanzu Mission Control (Optional component)
   * To manage our tkg clusters
