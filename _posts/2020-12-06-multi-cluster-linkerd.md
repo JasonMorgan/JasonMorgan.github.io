@@ -181,7 +181,7 @@ linkerd multicluster link --cluster-name workload1 --kubeconfig ~/configs/worklo
 
 ```
 
-You can see that a little more clearly in the screen grab below.
+You can, hopefully, see that a little more clearly in the screen grab below.
 
 ![terminal-view](/images/terminal-linkerd-mc-link.png)
 
@@ -208,7 +208,7 @@ When running the commands be sure you run a different version of the app manifes
 kubectl apply -k github.com/jasonmorgan/podinfo/workload1/
 ```
 
-![workloads](/images/term-linkerd-workloads.png)
+![workloads ](/images/term-linkerd-workloads.png)
 
 With that done now is a good time to checkout our new podinfo web service and see what it looks like. Run the following command for each cluster, be sure to either use a different port or run one at a time then browse to your the page.
 
@@ -282,6 +282,8 @@ Now apply that split.yaml we created earlier to your workload1 cluster.
 ```bash
 kubectl apply -f split.yaml
 ```
+
+![split](/images/term-linkerd-split.png)
 
 At this point you should see your browser switching between the local and remote podinfo services. With that you've successfully split traffic between two kubernetes clusters with linkerd! This is pretty neat as an example but think about some other ways we could apply this. We could isolate PCI workloads to a PCI cluster or run backing services in one cluster and front end apps in another.
 
