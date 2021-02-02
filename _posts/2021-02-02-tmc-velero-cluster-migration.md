@@ -1,7 +1,7 @@
 ---
 title:  "Kubernetes Cluster Migrations with Velero and Tanzu Mission Control"
 categories: [kubernetes]
-tags: [tmc,velero,kubernetes,k8s,mesh]
+tags: [tmc,velero,kubernetes,k8s]
 published: true
 ---
 
