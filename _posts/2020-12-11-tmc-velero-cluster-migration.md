@@ -2,7 +2,7 @@
 title:  "Kubernetes Cluster Migrations with Velero and Tanzu Mission Control"
 categories: [kubernetes]
 tags: [tmc,velero,kubernetes,k8s,mesh]
-published: false
+published: true
 ---
 
 Hey folks! I ran into an interesting situation with a customer the other day. They are using [Tanzu Mission Control](https://tanzu.vmware.com/mission-control) (TMC) with their kubernetes clusters and are trying to migrate from EKS to Tanzu Kubernetes (TKG) Clusters. I'm going to totally ignore the relative merits of EKS vs TKG and go straight to the how of the migration. 
