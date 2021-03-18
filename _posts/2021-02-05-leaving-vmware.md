@@ -1,6 +1,6 @@
 ---
-title:  "A Title"
-categories: []
+title:  "Thoughts on Moving On"
+categories: [personal]
 tags: []
 published: false
 ---
