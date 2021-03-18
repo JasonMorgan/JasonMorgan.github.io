@@ -34,15 +34,15 @@ By the end of this article you should be familiar with what flagger, flux, and l
 
 If you want to skip the explanations click [here](###Get) or just scroll down to the next section.
 
-### Understanding the Tools and Concepts
+## Understanding the Tools and Concepts
 
 So what is GitOps? What's a service mesh? And what is progressive delivery?
 
-#### GitOps
+### GitOps
 
 In addition to something every marketer in the cloud native space is talking about, GitOps refers to a concept that, I believe, was pioneered by the folks over at [Weave](weave.works). I read about it for the first time [here](https://www.weave.works/blog/gitops-operations-by-pull-request) and I loved the concept so much I ported it to Cloud Foundry and loved it. Today GitOps is generally associated with Kubernetes for a few reasons, one of the top ones being that everything you do in kubernetes can be defined in a yaml manifest. GitOps, is the name for holding your Kubernetes config files in a git repo and programatically applying them to your Kubernetes cluster. There are a few models and patterns associated with it so I'm not really going to dive in. For those CNCF enthusiasts there are currently 2 CNCF projects that aim to deliver GitOps to all of us, [Argo](https://argoproj.github.io/) and Flux.
 
-#### Service Mesh
+### Service Mesh
 
 Istio, or Envoy, or something every kubernetes company wants to sell you. Not really though, a service mesh is a relatively complex name for a fairly simple concept. You can read a whole [Meshifesto](https://buoyant.io/service-mesh-manifesto/) is you really want to understand it or you can take this definition for what it's worth:
 
@@ -52,15 +52,15 @@ A service mesh is a tool that controls the interactions between your application
 
 I'm a developer evangelist for Buoyant so I'm going to talk about Linkerd. If you want to know why I think Linkerd is awesome, and way better than Istio go [check it out](https://linkerd.io/2.10/getting-started/). The TL;DR is that Linkerd is small, fast, and works right out the gate.
 
-#### Progressive Delivery
+### Progressive Delivery
 
 This one is all about how do you handle deploying a new version of an app then shift traffic to it while your old version is still out there. Ideally using small increments of traffic that let you see how that new version is doing.
 
-### Get me to it
+## Get me to it
 
 Cool, that was a lot of words. Now lets do some stuff.
 
-#### Deploy a cluster
+### Deploy a cluster
 
 So if you're using anything other than k3d skip this part because you should already have it working.
 
@@ -99,7 +99,190 @@ flux-system   notification-controller-d9464dbdf-khdqq   1/1     Running     0   
 
 ### Gitops Away!
 
-Now that we have
+Now that we have flux installed we need to get it working. In this example we're going to be using 2 flux constructs, [kustomizations](https://toolkit.fluxcd.io/components/kustomize/kustomization/) and [gitrepositories](https://toolkit.fluxcd.io/components/source/gitrepositories/). Flux can also use [s3 compatible buckets](https://toolkit.fluxcd.io/components/source/buckets/) and deploy [helm charts](https://toolkit.fluxcd.io/components/source/helmcharts/) but they're out of scope for this article. Send me a message somewhere if you're looking for a deep dive into something else.
+
+#### Git to it
+
+Before we do anything else we need to provide flux with a git repo to pull from. I'm using my [linkerd-demos](https://github.com/JasonMorgan/linkerd-demos) repo but feel free to make your own. I'll be sure to talk about how you'd do that as we go along.
+
+In order to create a git repo we can use the flux cli, or we can just make a yaml object. I tend to make yaml objects but I'll show the flux cli for completeness.
+
+```bash
+# create a git repo
+flux create source git gitops --url https://github.com/JasonMorgan/linkerd-demos.git --branch main
+
+# You can run the same command with the export flag to have flux output a yaml object.
+flux create source git gitops --url https://github.com/JasonMorgan/linkerd-demos.git --branch main --export
+```
+
+By default it'll put everything in the flux-system namespace. You can override that if you like by providing the `--namespace` flag.
+
+Here's the yaml output for that flux create source command:
+
+```text
+✚ generating GitRepository source
+► applying GitRepository source
+✔ GitRepository source created
+◎ waiting for GitRepository source reconciliation
+✔ GitRepository source reconciliation completed
+✔ fetched revision: main/164832204e2e20915ad0a06c23bd19e85287aabd
+```
+
+And here's the yaml output of the command with the export flag.
+
+```yaml
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: gitops
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  url: https://github.com/JasonMorgan/fleet-infra.git
+```
+
+#### Runtime Config
+
+In my example I've got a pretty simple cluster config, or runtime, or platform, or whatever work you use for it. I'm installing Linkerd 2.10 and the Linkerd viz extension, along with flagger. Unfortunately for me they need to be installed in sequence. By that I mean that linkerd needs to be installed before linkerd viz, and flagger needs the prometheus instance in linkerd viz before it can get up and running. We're in luck though because flux implements a wait mechanism we can use, `dependsOn`.
+
+To get our cluster's runtime configured we're going to apply a [runtime yaml manifest](https://github.com/JasonMorgan/linkerd-demos/blob/main/gitops/flux/runtime/manifests/dev_cluster.yaml). Let's dig in and see what it does.
+
+You're going to see 3 kustomization objects, linkerd, linkerd-viz, and flagger. Each one is instrumented with [health checks](https://toolkit.fluxcd.io/components/kustomize/kustomization/#health-assessment) that will allow flux to know when a given kustomization is finished. I've put some comments inline in the yaml.
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: linkerd # Our kustomization name
+  namespace: flux-system
+spec:
+  interval: 30s
+  path: ./gitops/flux/runtime/source/linkerd # The folder in your git repo where the linkerd manifest is.
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: gitops # The name of the git repo we created earlier
+  validation: client
+  healthChecks: # Our health checks. These are important, the dependsOn statements won't work without these. I've built one health check for each deployment in the app.
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: linkerd-proxy-injector
+      namespace: linkerd
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: linkerd-identity
+      namespace: linkerd
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: linkerd-controller
+      namespace: linkerd
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: linkerd-sp-validator
+      namespace: linkerd
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: linkerd-destination
+      namespace: linkerd
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: linkerd-viz # Our kustomization name
+  namespace: flux-system
+spec:
+  dependsOn: # This is where we tell linker-viz to wait for linkerd to finish installing
+  - name: linkerd
+  interval: 30s
+  path: ./gitops/flux/runtime/source/linkerd-viz
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: gitops
+  validation: client
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: tap
+      namespace: linkerd-viz
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: metrics-api
+      namespace: linkerd-viz
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: prometheus
+      namespace: linkerd-viz
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: grafana
+      namespace: linkerd-viz
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: tap-injector
+      namespace: linkerd-viz
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: web
+      namespace: linkerd-viz
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: flagger # Our kustomization name
+  namespace: flux-system
+spec:
+  dependsOn: # This is where we tell linker-viz to wait for linkerd-viz to finish installing
+  - name: linkerd-viz
+  interval: 30s
+  path: ./gitops/flux/runtime/source/flagger
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: gitops
+  validation: client
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: flagger
+      namespace: linkerd-viz
+```
+
+You can find that yaml file in [this repo](https://github.com/JasonMorgan/linkerd-demos.git). I'm going to pull it down locally so we can run the rest of our commands from a local copy of the repo.
+
+```bash
+git clone https://github.com/JasonMorgan/linkerd-demos.git
+
+cd linkerd-demos
+```
+
+With the repo pulled down we can use the kubernetes cli to pass that manifest over to the kubernetes API. Flux created a bunch of [CRDs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) we can use so now we can just work with the kubernetes API itself for everything else.
+
+```bash
+kubectl apply -f gitops/flux/runtime/manifests/dev_cluster.yaml
+```
+
+You should see output like this:
+
+```text
+kustomization.kustomize.toolkit.fluxcd.io/linkerd created
+kustomization.kustomize.toolkit.fluxcd.io/linkerd-viz created
+kustomization.kustomize.toolkit.fluxcd.io/flagger created
+```
+
+Now we wait for flux to install our runtime.
+
+```bash
+watch kubectl get kustomizations -A
+# Press ctrl+c to break when flux is done
+```
+
+#### Deploy our App
+
+
 
 ## Wrap Up
 
