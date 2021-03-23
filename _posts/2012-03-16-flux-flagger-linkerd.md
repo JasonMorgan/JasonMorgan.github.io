@@ -45,6 +45,8 @@ What we're using:
     - [Runtime Config](#runtime-config)
     - [Deploy our App](#deploy-our-app)
   - [Canary Deployments](#canary-deployments)
+    - [What's going on?](#whats-going-on)
+    - [So what now?](#so-what-now)
 - [Wrap Up](#wrap-up)
 
 ## Getting Started
@@ -382,6 +384,8 @@ Now that podinfo is deployed things are about to get weird. Let's dive into flag
 
 This is where things start to get a little complicated. If you look at the kustomization for podinfo you'll see that it creates 1 podinfo deployment, 1 podinfo service, 3 pods, a canary object, and a horizontal pod autoscaler. The expectation with a gitops workflow, and the way kubernetes works in general, is that that is exactly what we should see in the podinfo namespace. When you look at podinfo however you'll find an environment that's significantly different.
 
+#### What's going on?
+
 Let's start by looking at our deployments
 
 ```bash
@@ -403,7 +407,7 @@ frontend and generator look just like the deployments from our original manifest
 kubectl get service -n podinfo
 ```
 
-Once again very similar to our deployments we have some new services. `podinfo-primary` and `podinfo-canary` are newly created and , as their names suggest, they'll be used to handly traffic to both the primary, and canary versions of our applications.
+Once again very similar to our deployments we have some new services. `podinfo-primary` and `podinfo-canary` are newly created and , as their names suggest, they'll be used to handly traffic to both the primary, and canary versions of our applications. The flagger canary with Linkerd uses a `trafficsplit` object to handle progressive rollouts. You can learn more about traffic splits [here](https://github.com/servicemeshinterface/smi-spec/blob/main/apis/traffic-split/v1alpha4/traffic-split.md). The TL;DR is that a traffic split requires at least 3 services, an Apex svc to route traffic and 2 backend services, one for each service that will share some fo the traffic.
 
 ```text
 NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
@@ -413,15 +417,39 @@ frontend          ClusterIP   10.43.49.225    <none>        8080/TCP   21h
 podinfo           ClusterIP   10.43.178.68    <none>        9898/TCP   21h
 ```
 
-
+Speaking of traffic splits, let's take a look at our trafficsplit object.
 
 ```bash
+kubectl describe trafficsplit -n podinfo podinfo
+```
 
+That'll output a lot of details but the part that really matters is:
+
+```text
+Spec:
+  Backends:
+    Service:  podinfo-canary
+    Weight:   0
+    Service:  podinfo-primary
+    Weight:   100
+  Service:    podinfo
+```
+
+That shows the current traffic distribution where 100% of the traffic is going to the `podinfo-primary` service. You can see this a little more planly with the `linkerd viz stat` command.
+
+```bash
+linkerd viz stat trafficsplit -n podinfo
 ```
 
 ```text
-
+NAME      APEX      LEAF              WEIGHT   SUCCESS       RPS   LATENCY_P50   LATENCY_P95   LATENCY_P99
+podinfo   podinfo   podinfo-canary         0         -         -             -             -             -
+podinfo   podinfo   podinfo-primary      100   100.00%   50.3rps           5ms          33ms          47ms
 ```
+
+#### So what now?
+
+
 
 ## Wrap Up
 
@@ -432,3 +460,27 @@ Thanks so much for reading and I'd love to hear any feedback you have,
 I'm: [twitter](https://twitter.com/RJasonMorgan) or [Linkedin](https://www.linkedin.com/in/jasonmorgan2/).
 
 Jason
+
+```bash
+
+```
+
+```text
+
+```
+
+```bash
+
+```
+
+```text
+
+```
+
+```bash
+
+```
+
+```text
+
+```
