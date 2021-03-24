@@ -487,38 +487,35 @@ spec:
             value: '#008000' # #008000 #1919FF
 ```
 
-Once the file has been updated commit the changes back to your repo and watch flux and flagger work. Under the hood Linkerd will handle shifting the traffic around, providing a common set of metrics for Flagger to evaluate. You can watch the app by loading the frontend of the UI or going to your ingress url. 
+Once the file has been updated commit the changes back to your repo and watch flux and flagger work. Under the hood Linkerd will handle shifting the traffic around, providing a common set of metrics for Flagger to evaluate. You can watch the app by loading the frontend of the UI or going to your ingress url.
+
+A few things to look at from the cli:
+
+```bash
+# Checkout the new pods
+kubectl get pods -n podinfo
+## You'll see the new podinfo pods
+
+# See the deployment state
+kubectl get deploy -n podinfo
+## You'll see that both podinfo and podinfo primary have pods associated with them now
+
+# Ask linkerd about the state of the trafficsplit
+linkerd viz stat ts -n podinfo
+## You'll see linkerd shifting traffic between the services
+
+```
+
+You can also see this through the Linkerd dashboard: `linkerd viz dashboard`
 
 ## Wrap Up
 
-Tell em what you told them. And what I wanted them to learn
+And that's it! Thanks for taking a tour of [Flux](https://github.com/fluxcd/flux2), [Flagger](https://github.com/fluxcd/flagger), and [Linkerd](https://github.com/linkerd/linkerd2) with me! We went over how to get flux installed, deploy a runtime to our cluster, chain dependencies, and install and app. We also looked at how flagger handles a change to an application it's managing.
+
+I'd love to hear if this was useful and I hope you get a chance to improve your kubernetes experience with GitOps and a simple service mesh.
 
 Thanks so much for reading and I'd love to hear any feedback you have,
 
-I'm: [twitter](https://twitter.com/RJasonMorgan) or [Linkedin](https://www.linkedin.com/in/jasonmorgan2/).
+You can find me on [twitter](https://twitter.com/RJasonMorgan) or [Linkedin](https://www.linkedin.com/in/jasonmorgan2/).
 
 Jason
-
-```bash
-
-```
-
-```text
-
-```
-
-```bash
-
-```
-
-```text
-
-```
-
-```bash
-
-```
-
-```text
-
-```
