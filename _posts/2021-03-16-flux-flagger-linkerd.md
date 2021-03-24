@@ -46,6 +46,7 @@ What we're using:
     - [Deploy our App](#deploy-our-app)
   - [Canary Deployments](#canary-deployments)
     - [What's going on?](#whats-going-on)
+    - [What does that mean?](#what-does-that-mean)
     - [So what now?](#so-what-now)
 - [Wrap Up](#wrap-up)
 
@@ -435,7 +436,7 @@ Spec:
   Service:    podinfo
 ```
 
-That shows the current traffic distribution where 100% of the traffic is going to the `podinfo-primary` service. You can see this a little more planly with the `linkerd viz stat` command.
+That shows the current traffic distribution where 100% of the traffic is going to the `podinfo-primary` service. You can see this a little more plainly with the `linkerd viz stat` command.
 
 ```bash
 linkerd viz stat trafficsplit -n podinfo
@@ -447,9 +448,46 @@ podinfo   podinfo   podinfo-canary         0         -         -             -  
 podinfo   podinfo   podinfo-primary      100   100.00%   50.3rps           5ms          33ms          47ms
 ```
 
+#### What does that mean?
+
+It means that flagger is initialized and is ready to start evaluating our application. You can see that by checking out flagger's canary object for podinfo.
+
+```bash
+kubectl get canaries.flagger.app -n podinfo
+```
+
+```text
+NAME      STATUS        WEIGHT   LASTTRANSITIONTIME
+podinfo   Initialized   0        2021-03-24T14:36:24Z
+```
+
 #### So what now?
 
+Our runtime has been deployed, our app has been installed, if you set it up on k3d you should even have a site that you can browse to at localhost:8081, and flagger is now monitoring your deployment and ready to do a canary deployment for new versions of your app. We can now trigger a new rollout of our application by updating the podinfo patch.yaml file.
 
+Under the podinfo deployment you'll need to change the value of PODINFO_UI_COLOR, I have two sample colors in the comments, I typically switch from blue to green but you can change any aspect of the deployment you like.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+spec:
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+        - name: podinfod
+          securityContext:
+            runAsUser: 1337
+          env:
+          - name: PODINFO_UI_COLOR
+            value: '#008000' # #008000 #1919FF
+```
+
+Once the file has been updated commit the changes back to your repo and watch flux and flagger work. Under the hood Linkerd will handle shifting the traffic around, providing a common set of metrics for Flagger to evaluate. You can watch the app by loading the frontend of the UI or going to your ingress url. 
 
 ## Wrap Up
 
